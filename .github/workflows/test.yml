@@ -1,9 +1,9 @@
 name: Test
 
 on:
-  schedule:
-    # every day at 10:00 UTC
-    - cron: "0 10 * * *"
+  # schedule:
+  #   # every day at 10:00 UTC
+  #   - cron: "0 10 * * *"
   push:
     paths-ignore:
       - "/*.sh"
@@ -31,21 +31,25 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ macos-latest, ubuntu-latest, windows-latest ]
-        package_manager: [ npm ]
-#        package_root: [ "./test/app-in-root/", "./test/app-in-subdirectory/", "./test/vue-app" ]
-        package_root: [ "./test/app-in-root/", "./test/app-in-subdirectory/" ]
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        package_manager: [npm, yarn, pnpm]
+        #        package_root: [ "./test/app-in-root/", "./test/app-in-subdirectory/", "./test/vue-app" ]
+        package_root: ["./test/app-in-root/", "./test/app-in-subdirectory/"]
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
+
+      - name: Install package manager
+        if: ${{ matrix.package_manager != 'npm' }}
+        run: npm install -g ${{ matrix.package_manager }}
 
       - name: Install test app dependencies
         run: |
