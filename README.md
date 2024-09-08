@@ -2,8 +2,7 @@
 
 THIS IS A FORK! :)
 
-[![Test](https://github.com/paneron/action-electron-builder/actions/workflows/test.yml/badge.svg)](https://github.com/paneron/action-electron-builder/actions/workflows/test.yml)
-
+[![Test](https://github.com/johannesjo/action-electron-builder/actions/workflows/test.yml/badge.svg)](https://github.com/johannesjo/action-electron-builder/actions/workflows/test.yml)
 
 **GitHub Action for building and releasing Electron apps**
 
@@ -52,7 +51,9 @@ GitHub Actions allows you to build your app on macOS, Windows and Linux without 
              # release the app after building
              release: ${{ startsWith(github.ref, 'refs/tags/v') }}
    ```
+
 - On macOS it will also create an arm release for your M1/M2 users
+
 ## Usage
 
 ### Building
@@ -69,6 +70,8 @@ When you want to create a new release, follow these steps:
 4. Push your changes to GitHub (`git push && git push --tags`)
 
 After building successfully, the action will publish your release artifacts. By default, a new release draft will be created on GitHub with download links for your app. If you want to change this behavior, have a look at the [`electron-builder` docs](https://www.electron.build).
+
+Please note that yarn is the default package manager, but auto-detection is in place depending on your lock file (We currently handle: `npm`, `yarn`, `pnpm`)
 
 ## Configuration
 
@@ -113,35 +116,35 @@ The same goes for **Windows** code signing (`windows_certs` and `windows_certs_p
 
 If you've configured `electron-builder` to notarize your Electron Mac app [as described in this guide](https://johannesjo.com/blog/2019-12-28-notarizing-your-electron-app), you can use the following steps to let GitHub Actions perform the notarization for you:
 
-1.  Define the following secrets in your repository's settings on GitHub:
+1. Define the following secrets in your repository's settings on GitHub:
 
-    - `api_key`: Content of the API key file (with the `p8` file extension)
-    - `api_key_id`: Key ID found on App Store Connect
-    - `api_key_issuer_id`: Issuer ID found on App Store Connect
+   - `api_key`: Content of the API key file (with the `p8` file extension)
+   - `api_key_id`: Key ID found on App Store Connect
+   - `api_key_issuer_id`: Issuer ID found on App Store Connect
 
-2.  In your workflow file, add the following step before your `action-electron-builder` step:
+2. In your workflow file, add the following step before your `action-electron-builder` step:
 
-    ```yml
-    - name: Prepare for app notarization
-      if: startsWith(matrix.os, 'macos')
-      # Import Apple API key for app notarization on macOS
-      run: |
-        mkdir -p ~/private_keys/
-        echo '${{ secrets.api_key }}' > ~/private_keys/AuthKey_${{ secrets.api_key_id }}.p8
-    ```
+   ```yml
+   - name: Prepare for app notarization
+     if: startsWith(matrix.os, 'macos')
+     # Import Apple API key for app notarization on macOS
+     run: |
+       mkdir -p ~/private_keys/
+       echo '${{ secrets.api_key }}' > ~/private_keys/AuthKey_${{ secrets.api_key_id }}.p8
+   ```
 
-3.  Pass the following environment variables to `action-electron-builder`:
+3. Pass the following environment variables to `action-electron-builder`:
 
-    ```yml
-    - name: Build/release Electron app
-      uses: johannesjo/action-electron-builder@v1
-      with:
-        # ...
-      env:
-        # macOS notarization API key
-        API_KEY_ID: ${{ secrets.api_key_id }}
-        API_KEY_ISSUER_ID: ${{ secrets.api_key_issuer_id }}
-    ```
+   ```yml
+   - name: Build/release Electron app
+     uses: johannesjo/action-electron-builder@v1
+     with:
+       # ...
+     env:
+       # macOS notarization API key
+       API_KEY_ID: ${{ secrets.api_key_id }}
+       API_KEY_ISSUER_ID: ${{ secrets.api_key_issuer_id }}
+   ```
 
 ## Development
 
